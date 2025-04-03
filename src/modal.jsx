@@ -1,149 +1,69 @@
+import { useState } from "react";
 import style from "./index.module.css";
 import imagesInfo from "./data/data";
-import { useState } from "react";
 
 function Fade({ isActive }) {
     return(
-        <>
-            <div className={`${style.fade} ${isActive ? style.active : ""}`} data-fade></div>
-        </>
+        <div className={`${style.fade} ${isActive ? style.active : ""}`} data-fade></div>
     )
-}
+};
 
-function Avatar({src}) {
-    return(
-        <>
-            <div className={style.wrapperImg}>
-                <img
-                    src={src}
-                    className={style.imgAvatar}
-                />
+function Card({ src, title, description, isActive, id }) {
+    return (
+        <article 
+            className={`${style.card} ${isActive ? style.active : ""}`} 
+            data-card 
+            data-id={id}
+        >
+            <div className={style.cardFront}>
+                <h2 className={style.title}>{title}</h2>
+                <div className={style.wrapperImg}>
+                    <img className={style.imgAvatar} src={src} alt="chmonya" />
+                </div>
+                <button className={style.btnCard} data-btn-open>подробнее</button>
             </div>
-        </>
-    )
+            <div className={style.cardBack}>
+                <p className={style.description}>{description}</p>
+                <button className={style.btnClose} data-btn-close></button>
+            </div>
+        </article>
+    );
 }
 
-function Card({children, paramsCard}) {
-    return(
-        <>
-            <article className={style.card} data-card>
-                {children(paramsCard)}
-            </article>
-        </>
-    )
-}
-
-function BtnCard() {
-    return(
-        <>
-            <button className={style.btnCard} data-btn-open>подробнее</button>
-        </>
-    )
-}
-
-function BtnClose() {
-    return(
-        <>
-            <button className={style.btnClose} data-btn-close></button>
-        </>
-    )
-}
-
-function ListCard() {
-
-    const [isFadeActive, setIsFadeActive] = useState(false);
+export default function ListCard() {
+    const [activeCardId, setActiveCardId] = useState(null);
 
     function handlerCardsState(event) {
-        if (event.target.closest("[data-btn-open]")) {
-            const card = event.target.closest("[data-card]");
-            if (card) {
-                setIsFadeActive(true);
-                card.classList.add(style.active);
-            }
-        } else if (event.target.closest("[data-btn-close]")) {
-            const card = event.target.closest("[data-card]");
-            if (card) {
-                setIsFadeActive(false);
-                card.classList.remove(style.active);
-            }
+        const cardElement = event.target.closest("[data-card]");
+        if (!cardElement) return;
+
+        const openBtn = event.target.closest("[data-btn-open]");
+        const closeBtn = event.target.closest("[data-btn-close]");
+        const cardId = cardElement.dataset.id;
+
+        if (openBtn) {
+            setActiveCardId(cardId);
+        } else if (closeBtn) {
+            setActiveCardId(null);
         }
     }
 
-    return( 
+    const listItems = imagesInfo.map((person) => (
+        <li className={style.item} key={person.key}>
+            <Card 
+                {...person} 
+                isActive={person.key === activeCardId}
+                id={person.key}
+            />
+        </li>
+    ));
+
+    return (
         <>
-            <Fade isActive={isFadeActive} />
+            <Fade isActive={activeCardId}/>
             <ul className={style.listCards} onClick={handlerCardsState}>
-                <li className={style.item}>
-                <Card paramsCard={imagesInfo["chmonya-regular"]}>
-                        {(paramsCard) => (
-                            <>
-                                <div className={style.cardFront}>
-                                    <h2 className={style.title}>{imagesInfo["chmonya-regular"].title}</h2>
-                                    <Avatar src={paramsCard.src}/>
-                                    <BtnCard />
-                                </div>
-                                <div className={style.cardBack}>
-                                    <p className={style.description}>{imagesInfo["chmonya-regular"].description}</p>
-                                    <BtnClose />
-                                </div>
-                            </>
-                        )}
-                    </Card>
-                </li>
-                <li className={style.item}>
-                    <Card paramsCard={imagesInfo["chmonya-zubenko"]}>
-                        {(paramsCard) => (
-                            <>
-                                <div className={style.cardFront}>
-                                    <h2 className={style.title}>{imagesInfo["chmonya-zubenko"].title}</h2>
-                                    <Avatar src={paramsCard.src}/>
-                                    <BtnCard />
-                                </div>
-                                <div className={style.cardBack}>
-                                    <p className={style.description}>{imagesInfo["chmonya-zubenko"].description}</p>
-                                    <BtnClose />
-                                </div>
-                            </>
-                        )}
-                    </Card>
-                </li>
-                <li className={style.item}>
-                <Card paramsCard={imagesInfo["chmonya-yandex-delivery"]}>
-                        {(paramsCard) => (
-                            <>
-                                <div className={style.cardFront}>
-                                    <h2 className={style.title}>{imagesInfo["chmonya-yandex-delivery"].title}</h2>
-                                    <Avatar src={paramsCard.src}/>
-                                    <BtnCard />
-                                </div>
-                                <div className={style.cardBack}>
-                                    <p className={style.description}>{imagesInfo["chmonya-yandex-delivery"].description}</p>
-                                    <BtnClose />
-                                </div>
-                            </>
-                        )}
-                    </Card>
-                </li>   
-                <li className={style.item}>
-                <Card paramsCard={imagesInfo["chmonya-vendetta"]}>
-                        {(paramsCard) => (
-                            <>
-                                <div className={style.cardFront}>
-                                    <h2 className={style.title}>{imagesInfo["chmonya-vendetta"].title}</h2>
-                                    <Avatar src={paramsCard.src}/>
-                                    <BtnCard />
-                                </div>
-                                <div className={style.cardBack}>
-                                    <p className={style.description}>{imagesInfo["chmonya-vendetta"].description}</p>
-                                    <BtnClose />
-                                </div>
-                            </>
-                        )}
-                    </Card>
-                </li>
+                {listItems}
             </ul>
         </>
-    )
+    );
 }
-
-export default ListCard;
